@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  php:
+    volumes: 
+      - ./site:/var/www/html
+    container_name: bling-php
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        TIMEZONE: "America/Sao_Paulo"
+    networks:
+      default:
+        ipv4_address: 172.15.0.3
+
+  server:
+    volumes: 
+      - ./site:/var/www/html
+    container_name: bling-ws
+    build: 
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - "8005:80"
+    depends_on:
+      - "php"
+    networks:
+      default:
+        ipv4_address: 172.15.0.2
+
+networks:
+  default:
+    external: 
+      name: bling_network
