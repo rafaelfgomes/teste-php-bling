@@ -1,7 +1,14 @@
+<!-- 
+    Orientação a objetos e design patterns
+    Implementar um padrão iterator no modelo abaixo. Apresentar o diagrama de classes e pseudocódigo.
+
+    Imagem: https://drive.google.com/file/d/1gEcqIDuMhw0-_IzzAiX9sCJKfVECv3aQ/view?usp=sharing
+ -->
+
 <?php
 
 interface Component {
-    public function getElements(): IteratorAggregate;
+    public function getElements(): ArrayIterator;
 }
 
 class Element implements Component {
@@ -13,9 +20,10 @@ class Element implements Component {
         $this->field = $field;   
     }
 
-    public function getElements(): ArrayObject
+    public function getElements(): ArrayIterator
     {
-        return new ArrayObject($this);
+        $iterator = (new ArrayObject())->getIterator(); 
+        return $iterator;
     }
 
 }
@@ -23,22 +31,48 @@ class Element implements Component {
 class Composite implements Component {
 
     public array $names;
+    public ArrayObject $elements;
 
     public function __construct(array $names)
     {
         $this->names = $names;
+        $this->elements = new ArrayObject();
     }
 
-    public function getElements(): \ArrayObject
+    public function getElements(): ArrayIterator
     {
         foreach ($this->names as $name) {
-            $elements = new Element($name);
+            $this->elements->append(new Element($name));
         }
 
-        return $elements->getElements();
+        return new ArrayIterator($this->elements);
     }
 }
 
-$names = new Composite([ 'João', 'Maria', 'José' ]);
+echo 'Lista de nomes' . "\n\n";
 
-print_r($names->getElements());
+echo 'Digite a quantidade de nomes da lista: ';
+$qtdNames = trim(fgets(STDIN, 1024));
+
+$names = [];
+
+if (!is_numeric($qtdNames)) {
+    die('São aceitos somente números');
+}
+
+foreach (range(1, $qtdNames) as $key => $qtd) {
+    echo 'Digite o ' . $qtd . 'º nome: ';
+    $names[$key] = trim(fgets(STDIN, 1024));
+}
+
+$namesTyped = new Composite($names);
+
+echo "\n";
+
+foreach ($namesTyped->getElements() as $key => $name) {
+    echo 'Nome: ' . $name->field . "\n";
+}
+
+echo "\n";
+
+//Diagrama de classes: https://drive.google.com/file/d/19briRu6RqgcLZOXnE9q8OtPMwks9lGSA/view?usp=sharing
